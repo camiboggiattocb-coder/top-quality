@@ -958,7 +958,8 @@ function doLogin(){
     document.getElementById('btn-login').disabled=false;
   });
 }
-function doLogout(){fbAuth.signOut();}
+var _intentLogout=false;
+function doLogout(){_intentLogout=true;fbAuth.signOut();}
 
 var _appStarted=false;
 fbAuth.onAuthStateChanged(function(user){
@@ -973,9 +974,11 @@ fbAuth.onAuthStateChanged(function(user){
     startApp();
   } else {
     // Si la sesion se cae DESPUES de haber entrado, avisar (no patear directo)
-    if(_appStarted){
+    if(_appStarted && !_intentLogout){
       var b=document.getElementById('session-banner');if(b)b.style.display='block';
     } else {
+      _intentLogout=false;_appStarted=false;
+      var sb2=document.getElementById('session-banner');if(sb2)sb2.style.display='none';
       document.getElementById('login-wrap').style.display='flex';
       document.getElementById('app-wrap').style.display='none';
     }

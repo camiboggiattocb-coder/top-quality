@@ -349,6 +349,7 @@ body.rol-vendedor .adminonly{display:none!important}
     <button class="ni" onclick="goTo('cobros')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Cobros</button>
     <div class="nav-sec">Inventario</div>
     <button class="ni adminonly" onclick="goTo('compras')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>Compras</button>
+    <button class="ni adminonly" onclick="goTo('proveedores')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4h13v11H1z"/><path d="M14 8h4l3 3v4h-7z"/><circle cx="5.5" cy="18" r="1.7"/><circle cx="17.5" cy="18" r="1.7"/></svg>Proveedores</button>
     <button class="ni" onclick="goTo('stock')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>Stock</button>
     <button class="ni adminonly" onclick="goTo('productos')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7" cy="7" r="1.2"/></svg>Productos</button>
     <div class="nav-sec adminonly">Finanzas</div>
@@ -694,6 +695,46 @@ body.rol-vendedor .adminonly{display:none!important}
 </div>
 
 
+<div class="sec adminonly" id="sec-proveedores">
+  <div class="ph">
+    <div><div class="pt">Proveedores</div><div class="ps">Deudas con proveedores y pagos</div></div>
+    <button class="btn bp bsm" onclick="provNuevo()">+ Proveedor / deuda anterior</button>
+  </div>
+  <div class="sg sg3" id="prov-kpis"></div>
+  <div class="card" style="margin-top:14px">
+    <div class="tw"><table>
+      <thead><tr><th>Proveedor</th><th>Deuda anterior</th><th>Deuda por compras</th><th>Deuda total</th><th></th></tr></thead>
+      <tbody id="prov-tb"></tbody>
+    </table><div class="empty" id="prov-em" style="display:none"><p>No hay proveedores cargados todav&#237;a.</p></div></div>
+  </div>
+</div>
+<div class="mo" id="mo-prov-nuevo"><div class="md" style="width:400px">
+  <div class="mh"><div class="mt2">Nuevo proveedor / deuda anterior</div><button class="mc2" onclick="closeMo('mo-prov-nuevo')">&#215;</button></div>
+  <div class="field"><label>Proveedor</label><input type="text" id="pn-nombre" placeholder="Nombre del proveedor"></div>
+  <div class="field"><label>Deuda anterior ($) &#8212; opcional</label><input type="number" id="pn-deuda" placeholder="0"></div>
+  <div class="field"><label>Concepto</label><input type="text" id="pn-concepto" placeholder="Deuda anterior"></div>
+  <div class="field"><label>Fecha</label><input type="date" id="pn-fecha"></div>
+  <div style="display:flex;gap:8px"><button class="btn bp" style="flex:1" onclick="saveProvNuevo()">Guardar</button><button class="btn bo" onclick="closeMo('mo-prov-nuevo')">Cancelar</button></div>
+</div></div>
+<div class="mo" id="mo-prov-cargo"><div class="md" style="width:380px">
+  <div class="mh"><div class="mt2">Cargar deuda</div><button class="mc2" onclick="closeMo('mo-prov-cargo')">&#215;</button></div>
+  <div id="pc-info" style="margin-bottom:14px;padding:10px 12px;background:var(--surf2);border-radius:var(--r);font-size:13px;font-weight:600"></div>
+  <div class="field"><label>Monto ($)</label><input type="number" id="pc-monto" placeholder="0"></div>
+  <div class="field"><label>Concepto</label><input type="text" id="pc-concepto" placeholder="Ej: mercader&#237;a, saldo anterior..."></div>
+  <div class="field"><label>Fecha</label><input type="date" id="pc-fecha"></div>
+  <div style="display:flex;gap:8px"><button class="btn bp" style="flex:1" onclick="saveProvCargo()">Cargar deuda</button><button class="btn bo" onclick="closeMo('mo-prov-cargo')">Cancelar</button></div>
+</div></div>
+<div class="mo" id="mo-prov-pago"><div class="md" style="width:380px">
+  <div class="mh"><div class="mt2">Registrar pago a proveedor</div><button class="mc2" onclick="closeMo('mo-prov-pago')">&#215;</button></div>
+  <div id="pgp-info" style="margin-bottom:14px;padding:10px 12px;background:var(--surf2);border-radius:var(--r);font-size:13px"></div>
+  <div class="field"><label>Monto ($)</label><input type="number" id="pgp-monto" placeholder="0"></div>
+  <div class="field"><label>Fecha</label><input type="date" id="pgp-fecha"></div>
+  <div class="field"><label>Medio de pago</label><select id="pgp-medio"><option>Transferencia</option><option>Cheque</option><option>Efectivo</option></select></div>
+  <div class="field"><label>Nota</label><input type="text" id="pgp-nota" placeholder="Opcional..."></div>
+  <div style="display:flex;gap:8px"><button class="btn bp" style="flex:1" onclick="saveProvPago()">Registrar pago</button><button class="btn bo" onclick="closeMo('mo-prov-pago')">Cancelar</button></div>
+</div></div>
+<div class="mo" id="mo-prov-det"><div class="md mdl"><div class="mh"><div class="mt2">Detalle de proveedor</div><button class="mc2" onclick="closeMo('mo-prov-det')">&#215;</button></div><div id="provdet-body"></div></div></div>
+
 <div class="sec" id="sec-agenda">
   <div class="ph"><div><div class="pt">Agenda</div><div class="ps">Cumplea&#241;os, tareas y cobros / pagos</div></div></div>
   <div id="ag-root"></div>
@@ -702,7 +743,7 @@ body.rol-vendedor .adminonly{display:none!important}
 <div class="sec man" id="sec-ayuda">
 <div class="ph"><div><div class="pt">Manual de uso</div><div class="ps">Guía paso a paso del sistema</div></div></div>
 <div class="banner2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.2 9.2a2.9 2.9 0 1 1 3.6 3.6c-.5.2-.8.7-.8 1.2v.6"/><path d="M12 17.4v.2"/></svg><div>Este manual se adapta a tu usuario: si sos <b>Vendedor</b> ves lo que usás; <b>Ale</b> y <b>Caren</b> ven todo. Cualquier duda, está siempre acá.</div></div>
-<div class="mcard"><div class="mhead"><div class="mico" style="background:#c52327"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10" width="15" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div><div><div class="mnum">PASO 1</div><div class="mtitle">Ingresar al sistema</div></div><span class="mrole all">Todos</span></div><div class="mbody"><ol><li>Abrí el link del sistema en el navegador (celular o compu).</li><li>Escribí tu <b>usuario</b> (ale, caren o vendedor) y tu <b>contraseña</b>.</li><li>Tocá <b>Ingresar</b>. Vas a ver el menú a la izquierda con lo disponible para vos.</li></ol></div><div class="mtip">💡 Abajo a la izquierda ves tu nombre y “Conectado”. Para salir, usá “Cerrar sesión”.</div></div><div class="mcard"><div class="mhead"><div class="mico" style="background:#1a6b3c"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg></div><div><div class="mnum">PASO 2</div><div class="mtitle">Hacer una venta</div></div><span class="mrole all">Todos</span></div><div class="mbody"><ol><li>Entrá a <b>Nueva venta</b>.</li><li>En <b>Buscar producto</b> escribí el nombre; al elegirlo se muestra tambi&#233;n su <b>c&#243;digo</b> al lado. Eleg&#237; <b>talle</b> y <b>cantidad</b>, y tocá <b>Agregar</b>. Repet&#237; para m&#225;s productos.</li><li>Eleg&#237; el <b>medio de pago</b> (efectivo, transferencia, tarjeta, o FASTCRED / FINAN YA / VIUMI), el <b>canal</b> (Local, Instagram, WhatsApp) y el <b>estado de cobro</b>.</li><li>Si es un cliente, escrib&#237; su nombre en <b>Cliente</b> y, si quer&#233;s, cargá su <b>WhatsApp</b> y su <b>fecha de cumplea&#241;os</b>: quedan guardados en Clientes y el cumple aparece solo en la Agenda.</li><li>Revisá el <b>Total a cobrar</b> y tocá <b>Confirmar venta</b>. El stock se descuenta solo y la venta queda registrada a tu nombre.</li><li>Se abre el <b>ticket</b>: podés Imprimir, generar un Ticket de cambio o empezar otra venta.</li></ol></div><div class="mtip">💡 El precio de tarjeta ya incluye el recargo; efectivo y transferencia usan el precio sin recargo.</div></div><div class="mcard"><div class="mhead"><div class="mico" style="background:#1a3d7a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div><div><div class="mnum">PASO 3</div><div class="mtitle">Ticket de cambio</div></div><span class="mrole all">Todos</span></div><div class="mbody"><ol><li>Después de confirmar una venta, en la ventana del ticket tocá <b>Ticket de cambio</b>.</li><li>Se imprime <b>sin precio</b>, con la <b>fecha de caducidad</b> (7 días) y la aclaración de cambio por otro producto abonando la diferencia.</li></ol></div></div><div class="mcard"><div class="mhead"><div class="mico" style="background:#b7791f"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div><div class="mnum">PASO 4</div><div class="mtitle">Cobros (cuenta corriente / fiado)</div></div><span class="mrole all">Todos</span></div><div class="mbody"><ol><li>En <b>Cobros</b> ves los clientes con <b>saldo pendiente</b> y el total a cobrar.</li><li>Cuando el cliente viene a pagar, tocá <b>Registrar pago</b> en su fila.</li><li>Escrib&#237; el <b>monto</b>, eleg&#237; el <b>medio de cobro</b> (transferencia o efectivo) y la fecha, y guardá. Queda registrado <b>qui&#233;n</b> tom&#243; el cobro.</li><li>Si paga todo queda <b>Pagado</b>; si paga una parte, <b>Parcial</b> con el nuevo saldo.</li></ol></div><div class="mtip">💡 Sirve cuando viene un cliente a pagar y no están Ale ni Caren: el Vendedor cobra igual.</div></div><div class="mcard"><div class="mhead"><div class="mico" style="background:#0f766e"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div><div><div class="mnum">PASO 5</div><div class="mtitle">Stock</div></div><span class="mrole all">Todos</span></div><div class="mbody"><ol><li>En <b>Stock</b> ves las unidades por producto y talle.</li><li>Usá el buscador y los filtros por rubro y subcategoría.</li><li>Rojo = sin stock · Ámbar = bajo el mínimo · Verde = OK.</li><li>Para corregir una cantidad (Ale/Caren), tocá <b>Ajustar</b>.</li></ol></div></div><div class="mcard"><div class="mhead"><div class="mico" style="background:#7c3aed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div><div class="mnum">PASO 6</div><div class="mtitle">Agenda</div></div><span class="mrole all">Todos</span></div><div class="mbody"><ol><li>Arriba eleg&#237; la vista: <b>D&#237;a</b>, <b>Semana</b>, <b>Mes</b> o <b>Lista</b>. Con las flechas te mov&#233;s de per&#237;odo y con <b>Hoy</b> volv&#233;s al d&#237;a actual.</li><li>Tocá <b>+ Nueva tarea</b> (o el <b>+</b> de un d&#237;a): pon&#233; qu&#233; hay que hacer, la <b>fecha</b>, la <b>hora</b> (opcional) y un <b>detalle</b>.</li><li>En <b>D&#243;nde va</b> eleg&#237; <b>Mi agenda personal</b> o <b>Agenda general</b> (la ven todos). Si es personal, pod&#233;s <b>asignarla</b> a Ale, Caren o el Vendedor marcando a cada uno.</li><li>Cada tarea la marc&#225;s <b>hecha</b> con el tilde, la <b>reprogram&#225;s</b> o la <b>arrastr&#225;s</b> a otro d&#237;a en Mes y Semana. Pod&#233;s agregarle <b>notas</b>.</li><li>Los <b>cumplea&#241;os</b> se cargan solos desde la venta, se repiten cada a&#241;o y tienen el bot&#243;n <b>&#128172; Saludar</b> por WhatsApp.</li></ol></div></div><div class="mcard adminonly"><div class="mhead"><div class="mico" style="background:#c52327"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></div><div><div class="mnum">PASO 7</div><div class="mtitle">Productos</div></div><span class="mrole">Ale y Caren</span></div><div class="mbody"><ol><li>En <b>Productos</b> ves el maestro con costos, precios y márgenes.</li><li><b>+ Nuevo producto</b>: rubro, tipo, talles, costo y precio.</li><li><b>Editar</b> cambia datos/precios; <b>Eliminar</b> quita una variante; <b>Borrar art.</b> elimina el artículo completo.</li></ol></div></div><div class="mcard adminonly"><div class="mhead"><div class="mico" style="background:#1a6b3c"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg></div><div><div class="mnum">PASO 8</div><div class="mtitle">Compras</div></div><span class="mrole">Ale y Caren</span></div><div class="mbody"><ol><li><b>Importante &#8212; primero los productos:</b> antes de cargar una compra, el/los productos ya tienen que estar creados en <b>Productos</b> con su <b>c&#243;digo</b>. Reci&#233;n despu&#233;s carg&#225;s la compra, porque la compra se arma buscando esos productos por su c&#243;digo.</li><li><b>+ Nueva compra</b>: eleg&#237; el proveedor y agregá los productos (al elegir cada uno se muestra su <b>c&#243;digo</b>) con cantidad y costo. Confirmá: <b>el stock sube solo.</b></li><li>Eleg&#237; el <b>medio de pago al proveedor</b>: transferencia, cheque o efectivo.</li><li>Si cambiás el costo, se actualiza en el producto (guarda el anterior en el historial).</li><li>Registrá el <b>pago al proveedor</b> (total o parcial) y controlá la deuda.</li><li><b>Editar</b> revierte el stock para reingresarla corregida; <b>Eliminar</b> la borra.</li></ol></div><div class="mtip">&#9888;&#65039; Si un producto todav&#237;a no existe con su c&#243;digo, cargalo primero en <b>Productos</b> y despu&#233;s hac&#233; la compra.</div></div><div class="mcard adminonly"><div class="mhead"><div class="mico" style="background:#b7791f"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 6l-9.5 9.5-5-5L1 18"/><path d="M17 6h6v6"/></svg></div><div><div class="mnum">PASO 9</div><div class="mtitle">Flujo y Cierre de caja</div></div><span class="mrole">Ale y Caren</span></div><div class="mbody"><ol><li><b>Flujo de caja</b>: ingresos y egresos; cargá gastos/retiros y eliminá movimientos.</li><li>Cada venta y cobro impacta en la <b>fecha</b> en que realmente acredita seg&#250;n el medio.</li><li><b>Cierre de caja</b>: total del per&#237;odo separado por medio de pago, con la columna <b>Fecha</b> de cada movimiento, para cuadrar el d&#237;a.</li></ol></div></div><div class="mcard adminonly"><div class="mhead"><div class="mico" style="background:#1a3d7a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div><div class="mnum">PASO 10</div><div class="mtitle">Resumen</div></div><span class="mrole">Ale y Caren</span></div><div class="mbody"><ol><li>Tablero de ventas, facturado, ticket promedio y unidades por per&#237;odo.</li><li>Ventas por rubro, por canal, ranking de productos y <b>qu&#233; usuario</b> realiz&#243; cada venta.</li><li><b>Valor de stock por rubro</b>: la plata inmovilizada, a costo.</li></ol></div></div><div class="mcard adminonly"><div class="mhead"><div class="mico" style="background:#0f766e"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/></svg></div><div><div class="mnum">PASO 11</div><div class="mtitle">Configuración</div></div><span class="mrole">Ale y Caren</span></div><div class="mbody"><ol><li><b>Comisiones de financieras</b> (FASTCRED, FINAN YA, VIUMI) para el neto real.</li><li><b>Plazos de acreditación</b>: en cuántos días acredita cada medio. Editalo cuando cambie.</li><li><b>Coeficiente de costos fijos</b>: % que se suma al costo para el costo real.</li></ol></div></div><div class="mcard adminonly"><div class="mhead"><div class="mico" style="background:#5b636b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div><div class="mnum">PASO 12</div><div class="mtitle">Usuarios y permisos</div></div><span class="mrole">Ale y Caren</span></div><div class="mbody"><ul><li><b>Ale y Caren</b>: acceso completo; editan y eliminan todo.</li><li><b>Vendedor</b>: solo Nueva venta, Cobros, Stock y Agenda. No ve costos ni finanzas. Puede hacer tickets de cambio y cobrar.</li></ul></div></div>
+<div class="mcard"><div class="mhead"><div class="mico" style="background:#c52327"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10" width="15" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div><div><div class="mnum">PASO 1</div><div class="mtitle">Ingresar al sistema</div></div><span class="mrole all">Todos</span></div><div class="mbody"><ol><li>Abrí el link del sistema en el navegador (celular o compu).</li><li>Escribí tu <b>usuario</b> (ale, caren o vendedor) y tu <b>contraseña</b>.</li><li>Tocá <b>Ingresar</b>. Vas a ver el menú a la izquierda con lo disponible para vos.</li></ol></div><div class="mtip">💡 Abajo a la izquierda ves tu nombre y “Conectado”. Para salir, usá “Cerrar sesión”.</div></div><div class="mcard"><div class="mhead"><div class="mico" style="background:#1a6b3c"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg></div><div><div class="mnum">PASO 2</div><div class="mtitle">Hacer una venta</div></div><span class="mrole all">Todos</span></div><div class="mbody"><ol><li>Entrá a <b>Nueva venta</b>.</li><li>En <b>Buscar producto</b> escribí el nombre; al elegirlo se muestra tambi&#233;n su <b>c&#243;digo</b> al lado. Eleg&#237; <b>talle</b> y <b>cantidad</b>, y tocá <b>Agregar</b>. Repet&#237; para m&#225;s productos.</li><li>Eleg&#237; el <b>medio de pago</b> (efectivo, transferencia, tarjeta, o FASTCRED / FINAN YA / VIUMI), el <b>canal</b> (Local, Instagram, WhatsApp) y el <b>estado de cobro</b>.</li><li>Si es un cliente, escrib&#237; su nombre en <b>Cliente</b> y, si quer&#233;s, cargá su <b>WhatsApp</b> y su <b>fecha de cumplea&#241;os</b>: quedan guardados en Clientes y el cumple aparece solo en la Agenda.</li><li>Revisá el <b>Total a cobrar</b> y tocá <b>Confirmar venta</b>. El stock se descuenta solo y la venta queda registrada a tu nombre.</li><li>Se abre el <b>ticket</b>: podés Imprimir, generar un Ticket de cambio o empezar otra venta.</li></ol></div><div class="mtip">💡 El precio de tarjeta ya incluye el recargo; efectivo y transferencia usan el precio sin recargo.</div></div><div class="mcard"><div class="mhead"><div class="mico" style="background:#1a3d7a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div><div><div class="mnum">PASO 3</div><div class="mtitle">Ticket de cambio</div></div><span class="mrole all">Todos</span></div><div class="mbody"><ol><li>Después de confirmar una venta, en la ventana del ticket tocá <b>Ticket de cambio</b>.</li><li>Se imprime <b>sin precio</b>, con la <b>fecha de caducidad</b> (7 días) y la aclaración de cambio por otro producto abonando la diferencia.</li></ol></div></div><div class="mcard"><div class="mhead"><div class="mico" style="background:#b7791f"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div><div class="mnum">PASO 4</div><div class="mtitle">Cobros (cuenta corriente / fiado)</div></div><span class="mrole all">Todos</span></div><div class="mbody"><ol><li>En <b>Cobros</b> ves los clientes con <b>saldo pendiente</b> y el total a cobrar.</li><li>Cuando el cliente viene a pagar, tocá <b>Registrar pago</b> en su fila.</li><li>Escrib&#237; el <b>monto</b>, eleg&#237; el <b>medio de cobro</b> (transferencia o efectivo) y la fecha, y guardá. Queda registrado <b>qui&#233;n</b> tom&#243; el cobro.</li><li>Si paga todo queda <b>Pagado</b>; si paga una parte, <b>Parcial</b> con el nuevo saldo.</li></ol></div><div class="mtip">💡 Sirve cuando viene un cliente a pagar y no están Ale ni Caren: el Vendedor cobra igual.</div></div><div class="mcard"><div class="mhead"><div class="mico" style="background:#0f766e"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div><div><div class="mnum">PASO 5</div><div class="mtitle">Stock</div></div><span class="mrole all">Todos</span></div><div class="mbody"><ol><li>En <b>Stock</b> ves las unidades por producto y talle.</li><li>Usá el buscador y los filtros por rubro y subcategoría.</li><li>Rojo = sin stock · Ámbar = bajo el mínimo · Verde = OK.</li><li>Para corregir una cantidad (Ale/Caren), tocá <b>Ajustar</b>.</li></ol></div></div><div class="mcard"><div class="mhead"><div class="mico" style="background:#7c3aed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div><div class="mnum">PASO 6</div><div class="mtitle">Agenda</div></div><span class="mrole all">Todos</span></div><div class="mbody"><ol><li>Arriba eleg&#237; la vista: <b>D&#237;a</b>, <b>Semana</b>, <b>Mes</b> o <b>Lista</b>. Con las flechas te mov&#233;s de per&#237;odo y con <b>Hoy</b> volv&#233;s al d&#237;a actual.</li><li>Tocá <b>+ Nueva tarea</b> (o el <b>+</b> de un d&#237;a): pon&#233; qu&#233; hay que hacer, la <b>fecha</b>, la <b>hora</b> (opcional) y un <b>detalle</b>.</li><li>En <b>D&#243;nde va</b> eleg&#237; <b>Mi agenda personal</b> o <b>Agenda general</b> (la ven todos). Si es personal, pod&#233;s <b>asignarla</b> a Ale, Caren o el Vendedor marcando a cada uno.</li><li>Cada tarea la marc&#225;s <b>hecha</b> con el tilde, la <b>reprogram&#225;s</b> o la <b>arrastr&#225;s</b> a otro d&#237;a en Mes y Semana. Pod&#233;s agregarle <b>notas</b>.</li><li>Los <b>cumplea&#241;os</b> se cargan solos desde la venta, se repiten cada a&#241;o y tienen el bot&#243;n <b>&#128172; Saludar</b> por WhatsApp.</li></ol></div></div><div class="mcard adminonly"><div class="mhead"><div class="mico" style="background:#c52327"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></div><div><div class="mnum">PASO 7</div><div class="mtitle">Productos</div></div><span class="mrole">Ale y Caren</span></div><div class="mbody"><ol><li>En <b>Productos</b> ves el maestro con costos, precios y márgenes.</li><li><b>+ Nuevo producto</b>: rubro, tipo, talles, costo y precio.</li><li><b>Editar</b> cambia datos/precios; <b>Eliminar</b> quita una variante; <b>Borrar art.</b> elimina el artículo completo.</li></ol></div></div><div class="mcard adminonly"><div class="mhead"><div class="mico" style="background:#1a6b3c"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg></div><div><div class="mnum">PASO 8</div><div class="mtitle">Compras</div></div><span class="mrole">Ale y Caren</span></div><div class="mbody"><ol><li><b>Importante &#8212; primero los productos:</b> antes de cargar una compra, el/los productos ya tienen que estar creados en <b>Productos</b> con su <b>c&#243;digo</b>. Reci&#233;n despu&#233;s carg&#225;s la compra, porque la compra se arma buscando esos productos por su c&#243;digo.</li><li><b>+ Nueva compra</b>: eleg&#237; el proveedor y agregá los productos (al elegir cada uno se muestra su <b>c&#243;digo</b>) con cantidad y costo. Confirmá: <b>el stock sube solo.</b></li><li>Eleg&#237; el <b>medio de pago al proveedor</b>: transferencia, cheque o efectivo.</li><li>Si cambiás el costo, se actualiza en el producto (guarda el anterior en el historial).</li><li>Registrá el <b>pago al proveedor</b> (total o parcial) y controlá la deuda.</li><li><b>Editar</b> revierte el stock para reingresarla corregida; <b>Eliminar</b> la borra.</li></ol></div><div class="mtip">&#9888;&#65039; Si un producto todav&#237;a no existe con su c&#243;digo, cargalo primero en <b>Productos</b> y despu&#233;s hac&#233; la compra.</div></div><div class="mcard adminonly"><div class="mhead"><div class="mico" style="background:#8a1c1c"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4h13v11H1z"/><path d="M14 8h4l3 3v4h-7z"/><circle cx="5.5" cy="18" r="1.5"/><circle cx="17.5" cy="18" r="1.5"/></svg></div><div><div class="mnum">PASO 9</div><div class="mtitle">Proveedores</div></div><span class="mrole">Ale y Caren</span></div><div class="mbody"><ol><li><b>Cargar deuda anterior:</b> tocá <b>+ Proveedor / deuda anterior</b>, pon&#233; el nombre y el monto que ya le deb&#237;as de antes. Queda registrado como deuda de ese proveedor.</li><li>Cada fila muestra la <b>Deuda anterior</b>, la <b>Deuda por compras</b> (viene sola de lo que carg&#225;s en Compras) y la <b>Deuda total</b>.</li><li><b>+ Deuda</b>: sum&#225;s una deuda nueva a un proveedor. <b>Registrar pago</b>: descont&#225;s lo que le vas pagando (transferencia, cheque o efectivo); queda como egreso en el Flujo de caja.</li><li><b>Detalle</b>: ves todos los movimientos del proveedor (deudas anteriores, compras y pagos).</li></ol></div><div class="mtip">&#128161; La deuda por compras se paga desde la solapa <b>Compras</b>; la deuda anterior se paga ac&#225;. Las dos suman la deuda total.</div></div><div class="mcard adminonly"><div class="mhead"><div class="mico" style="background:#b7791f"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 6l-9.5 9.5-5-5L1 18"/><path d="M17 6h6v6"/></svg></div><div><div class="mnum">PASO 10</div><div class="mtitle">Flujo y Cierre de caja</div></div><span class="mrole">Ale y Caren</span></div><div class="mbody"><ol><li><b>Flujo de caja</b>: ingresos y egresos; cargá gastos/retiros y eliminá movimientos.</li><li>Cada venta y cobro impacta en la <b>fecha</b> en que realmente acredita seg&#250;n el medio.</li><li><b>Cierre de caja</b>: total del per&#237;odo separado por medio de pago, con la columna <b>Fecha</b> de cada movimiento, para cuadrar el d&#237;a.</li></ol></div></div><div class="mcard adminonly"><div class="mhead"><div class="mico" style="background:#1a3d7a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div><div class="mnum">PASO 11</div><div class="mtitle">Resumen</div></div><span class="mrole">Ale y Caren</span></div><div class="mbody"><ol><li>Tablero de ventas, facturado, ticket promedio y unidades por per&#237;odo.</li><li>Ventas por rubro, por canal, ranking de productos y <b>qu&#233; usuario</b> realiz&#243; cada venta.</li><li><b>Valor de stock por rubro</b>: la plata inmovilizada, a costo.</li></ol></div></div><div class="mcard adminonly"><div class="mhead"><div class="mico" style="background:#0f766e"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/></svg></div><div><div class="mnum">PASO 12</div><div class="mtitle">Configuración</div></div><span class="mrole">Ale y Caren</span></div><div class="mbody"><ol><li><b>Comisiones de financieras</b> (FASTCRED, FINAN YA, VIUMI) para el neto real.</li><li><b>Plazos de acreditación</b>: en cuántos días acredita cada medio. Editalo cuando cambie.</li><li><b>Coeficiente de costos fijos</b>: % que se suma al costo para el costo real.</li></ol></div></div><div class="mcard adminonly"><div class="mhead"><div class="mico" style="background:#5b636b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div><div class="mnum">PASO 13</div><div class="mtitle">Usuarios y permisos</div></div><span class="mrole">Ale y Caren</span></div><div class="mbody"><ul><li><b>Ale y Caren</b>: acceso completo; editan y eliminan todo.</li><li><b>Vendedor</b>: solo Nueva venta, Cobros, Stock y Agenda. No ve costos ni finanzas. Puede hacer tickets de cambio y cobrar.</li></ul></div></div>
 </div>
 
 <div class="sec" id="sec-config">
@@ -1110,6 +1151,7 @@ function fbSave(){
     fbDB.collection('topquality').doc('flujo').set({list:_F}),
     fbDB.collection('topquality').doc('stock').set({s:_S,sm:_SM}),
     fbDB.collection('topquality').doc('agenda').set({list:AG.tareas,borradas:AG.borradas||{},autoCorrer:AG.autoCorrer!==false}),
+    fbDB.collection('topquality').doc('proveedores').set({map:PROV}),
     fbDB.collection('topquality').doc('clientes').set({map:_CLI})
   ]).then(function(){setSaveOk();}).catch(function(e){handleSaveError(e);});
 }
@@ -1170,6 +1212,150 @@ function agListen(){
     if(s&&s.id==='sec-agenda')renderAgenda();
   });
 }
+/* ====== PROVEEDORES (deudas anteriores + pagos) — solo Ale y Caren ====== */
+var PROV = {};
+var provCurKey = null;
+function provKey(n){return String(n||'').trim().toLowerCase();}
+function saveProv(){setSaving(true);fbDB.collection('topquality').doc('proveedores').set({map:PROV}).then(function(){setSaveOk();}).catch(function(e){handleSaveError(e);});}
+function provListen(){fbDB.collection('topquality').doc('proveedores').onSnapshot(function(doc){if(doc.exists&&doc.data().map)PROV=doc.data().map;var s=document.querySelector('.sec.active');if(s&&s.id==='sec-proveedores')renderProveedores();});}
+
+function provComprasSaldo(key){
+  return (DB.c||[]).filter(function(c){return provKey(c.proveedor)===key;}).reduce(function(a,c){
+    var pg=(c.pagos||[]).reduce(function(x,p){return x+(+p.monto||0);},0);
+    return a+Math.max(0,(+c.total||0)-pg);
+  },0);
+}
+function provManualSaldo(p){
+  if(!p)return 0;
+  var car=(p.cargos||[]).reduce(function(a,c){return a+(+c.monto||0);},0);
+  var pag=(p.pagos||[]).reduce(function(a,c){return a+(+c.monto||0);},0);
+  return car-pag;
+}
+function provLista(){
+  var m={};
+  Object.keys(PROV).forEach(function(k){m[k]={nombre:PROV[k].nombre||k};});
+  (DB.c||[]).forEach(function(c){var k=provKey(c.proveedor);if(k&&!m[k])m[k]={nombre:c.proveedor};});
+  return Object.keys(m).map(function(k){return {key:k,nombre:m[k].nombre,p:PROV[k]||{nombre:m[k].nombre,cargos:[],pagos:[]}};})
+    .sort(function(a,b){return String(a.nombre).localeCompare(String(b.nombre));});
+}
+function provGet(key){ if(!PROV[key])PROV[key]={nombre:key,cargos:[],pagos:[]}; if(!PROV[key].cargos)PROV[key].cargos=[]; if(!PROV[key].pagos)PROV[key].pagos=[]; return PROV[key]; }
+
+function renderProveedores(){
+  var tb=el('prov-tb'),em=el('prov-em'),kp=el('prov-kpis');
+  if(!tb)return;
+  var lista=provLista();
+  var totAnt=0,totComp=0;
+  lista.forEach(function(o){totAnt+=provManualSaldo(o.p);totComp+=provComprasSaldo(o.key);});
+  var totGen=totAnt+totComp;
+  if(kp){kp.className='sg sg3';kp.innerHTML=
+    '<div class="sc"><div class="sl">Deuda anterior / manual</div><div class="sv" style="color:var(--amber)">'+fmt(totAnt)+'</div></div>'+
+    '<div class="sc"><div class="sl">Deuda por compras</div><div class="sv" style="color:var(--amber)">'+fmt(totComp)+'</div></div>'+
+    '<div class="sc"><div class="sl">Deuda total</div><div class="sv" style="color:var(--red)">'+fmt(totGen)+'</div></div>';}
+  tb.innerHTML='';
+  if(!lista.length){if(em)em.style.display='block';return;}
+  if(em)em.style.display='none';
+  lista.forEach(function(o){
+    var ant=provManualSaldo(o.p), comp=provComprasSaldo(o.key), tot=ant+comp;
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td><b>'+esc(o.nombre)+'</b></td>'
+      +'<td style="color:'+(ant>0?'var(--amber)':'var(--txt3)')+'">'+fmt(ant)+'</td>'
+      +'<td style="color:'+(comp>0?'var(--amber)':'var(--txt3)')+'">'+fmt(comp)+'</td>'
+      +'<td><b style="color:'+(tot>0?'var(--red)':'var(--green)')+'">'+fmt(tot)+'</b></td>'
+      +'<td class="prov-acts">'
+        +'<button class="btn bo bsm" onclick="provCargo(\''+o.key+'\')">+ Deuda</button>'
+        +'<button class="btn bp bsm" onclick="provPago(\''+o.key+'\')">Registrar pago</button>'
+        +'<button class="btn bo bsm" onclick="provDetalle(\''+o.key+'\')">Detalle</button>'
+      +'</td>';
+    tb.appendChild(tr);
+  });
+}
+
+/* --- Nuevo proveedor + deuda anterior --- */
+function provNuevo(){
+  if(el('pn-nombre'))el('pn-nombre').value='';
+  if(el('pn-deuda'))el('pn-deuda').value='';
+  if(el('pn-fecha'))el('pn-fecha').value=tod();
+  if(el('pn-concepto'))el('pn-concepto').value='Deuda anterior';
+  openMo('mo-prov-nuevo');
+}
+function saveProvNuevo(){
+  var nom=(el('pn-nombre')?el('pn-nombre').value.trim():'');
+  if(!nom){toast('Ingresá el nombre del proveedor');return;}
+  var key=provKey(nom);
+  var p=provGet(key); p.nombre=nom;
+  var monto=+(el('pn-deuda')?el('pn-deuda').value:0)||0;
+  if(monto>0){
+    p.cargos.push({id:uid(),fecha:(el('pn-fecha')?el('pn-fecha').value:tod()),concepto:(el('pn-concepto')?el('pn-concepto').value.trim():'')||'Deuda anterior',monto:monto});
+  }
+  saveProv();closeMo('mo-prov-nuevo');renderProveedores();
+  toast('Proveedor guardado');
+}
+
+/* --- Agregar una deuda / cargo --- */
+function provCargo(key){
+  provCurKey=key; var p=provGet(key);
+  if(el('pc-info'))el('pc-info').textContent=p.nombre||key;
+  if(el('pc-monto'))el('pc-monto').value='';
+  if(el('pc-concepto'))el('pc-concepto').value='';
+  if(el('pc-fecha'))el('pc-fecha').value=tod();
+  openMo('mo-prov-cargo');
+}
+function saveProvCargo(){
+  var p=provGet(provCurKey);
+  var monto=+(el('pc-monto')?el('pc-monto').value:0)||0;
+  if(monto<=0){toast('Ingresá un monto');return;}
+  p.cargos.push({id:uid(),fecha:(el('pc-fecha')?el('pc-fecha').value:tod()),concepto:(el('pc-concepto')?el('pc-concepto').value.trim():'')||'Deuda',monto:monto});
+  saveProv();closeMo('mo-prov-cargo');renderProveedores();
+  toast('Deuda cargada');
+}
+
+/* --- Registrar pago (paga deuda anterior/manual + egreso en Flujo) --- */
+function provPago(key){
+  provCurKey=key; var p=provGet(key);
+  var ant=provManualSaldo(p);
+  if(el('pgp-info'))el('pgp-info').textContent=(p.nombre||key)+' — Deuda anterior/manual: '+fmt(ant);
+  if(el('pgp-monto'))el('pgp-monto').value=ant>0?ant:'';
+  if(el('pgp-fecha'))el('pgp-fecha').value=tod();
+  if(el('pgp-nota'))el('pgp-nota').value='';
+  openMo('mo-prov-pago');
+}
+function saveProvPago(){
+  var p=provGet(provCurKey);
+  var monto=+(el('pgp-monto')?el('pgp-monto').value:0)||0;
+  if(monto<=0){toast('Ingresá un monto');return;}
+  var fecha=(el('pgp-fecha')?el('pgp-fecha').value:tod());
+  var medio=(el('pgp-medio')?el('pgp-medio').value:'Transferencia');
+  var nota=(el('pgp-nota')?el('pgp-nota').value.trim():'')||'Pago de deuda';
+  p.pagos.push({id:uid(),fecha:fecha,medio:medio,nota:nota,monto:monto,usuario:window._USER||''});
+  DB.f.unshift({id:uid(),fecha:fecha,concepto:'Pago proveedor - '+(p.nombre||provCurKey),cat:'Proveedores',tipo:'egreso',monto:monto,medio:medio,usuario:window._USER||''});
+  fbSave();closeMo('mo-prov-pago');renderProveedores();
+  toast('Pago registrado');
+}
+
+/* --- Detalle: movimientos del proveedor --- */
+function provDetalle(key){
+  provCurKey=key; var p=provGet(key);
+  var rows=[];
+  (p.cargos||[]).forEach(function(c){rows.push({fecha:c.fecha,tipo:'Deuda',desc:c.concepto||'Deuda',debe:+c.monto||0,haber:0});});
+  (p.pagos||[]).forEach(function(pg){rows.push({fecha:pg.fecha,tipo:'Pago',desc:(pg.nota||'Pago')+' ('+(pg.medio||'')+')'+(pg.usuario?' · '+pg.usuario:''),debe:0,haber:+pg.monto||0});});
+  (DB.c||[]).filter(function(c){return provKey(c.proveedor)===key;}).forEach(function(c){
+    var pg=(c.pagos||[]).reduce(function(x,q){return x+(+q.monto||0);},0);
+    rows.push({fecha:c.fecha,tipo:'Compra',desc:(c.items?c.items.length:0)+' items · total '+fmt(c.total),debe:+c.total||0,haber:pg});
+  });
+  rows.sort(function(a,b){return String(a.fecha).localeCompare(String(b.fecha));});
+  var ant=provManualSaldo(p),comp=provComprasSaldo(key),tot=ant+comp;
+  var h='<div style="margin-bottom:12px;font-size:13px"><b>'+esc(p.nombre||key)+'</b><br>'
+    +'<span class="muted">Deuda anterior/manual:</span> '+fmt(ant)+' · <span class="muted">Compras:</span> '+fmt(comp)+' · <b style="color:var(--red)">Total: '+fmt(tot)+'</b></div>';
+  if(!rows.length){ h+='<div class="muted">Sin movimientos.</div>'; }
+  else{
+    h+='<div class="tw"><table><thead><tr><th>Fecha</th><th>Tipo</th><th>Detalle</th><th>Debe</th><th>Pagado</th></tr></thead><tbody>';
+    rows.forEach(function(r){h+='<tr><td>'+fmtD(r.fecha)+'</td><td>'+r.tipo+'</td><td>'+esc(r.desc)+'</td><td>'+(r.debe?fmt(r.debe):'-')+'</td><td>'+(r.haber?fmt(r.haber):'-')+'</td></tr>';});
+    h+='</tbody></table></div>';
+  }
+  if(el('provdet-body'))el('provdet-body').innerHTML=h;
+  openMo('mo-prov-det');
+}
+
 /* ====== AGENDA ESTILO NEXUS (día / semana / mes / lista) ====== */
 var USUARIOS = {ale:{nombre:"Ale"}, caren:{nombre:"Caren"}, vendedor:{nombre:"Vendedor"}};
 var U = null;
@@ -1611,6 +1797,7 @@ function renderDashboard(){
 function startApp(){
   agListen();
   try{cliListen();}catch(e){}
+  try{provListen();}catch(e){}
   try{loadFin();}catch(e){}
   try{loadDias();}catch(e){}
   // Load all data once on startup, then listen for changes
@@ -1632,6 +1819,7 @@ function startApp(){
     if(doc.exists){_C=doc.data().list||[];}
     var s=document.querySelector('.sec.active');
     if(s&&s.id==='sec-compras')renderCompras();
+    if(s&&s.id==='sec-proveedores')renderProveedores();
   });
 
   // Flujo - realtime
@@ -1764,7 +1952,7 @@ function mk(tag,cls,txt){
 }
 
 // ===== NAV =====
-var NAV=['venta','ventas','clientes','cobros','compras','stock','productos','flujo','cierre','resumen','agenda','ayuda','config'];
+var NAV=['venta','ventas','clientes','cobros','compras','proveedores','stock','productos','flujo','cierre','resumen','agenda','ayuda','config'];
 function goTo(s){
   var NAVL = (typeof NAV !== 'undefined' && Array.isArray(NAV)) ? NAV : [];
   NAVL.forEach(function(x){var e=el('sec-'+x);if(e)e.classList.remove('active');});
@@ -1772,7 +1960,7 @@ function goTo(s){
   var e=el('sec-'+s);if(e)e.classList.add('active');
   var idx=NAVL.indexOf(s);
   var nis=document.querySelectorAll('.ni');if(nis[idx])nis[idx].classList.add('active');
-  var map={ventas:renderVentas,clientes:renderClientes,cobros:renderCobros,compras:renderCompras,stock:renderStock,productos:renderProds,flujo:renderFlujo,cierre:renderCierre,resumen:renderResumen,agenda:renderAgenda};
+  var map={ventas:renderVentas,clientes:renderClientes,cobros:renderCobros,compras:renderCompras,proveedores:renderProveedores,stock:renderStock,productos:renderProds,flujo:renderFlujo,cierre:renderCierre,resumen:renderResumen,agenda:renderAgenda};
   if(map[s])map[s]();
 }
 // ===== NUEVA VENTA =====
@@ -3410,15 +3598,15 @@ updCli();renderStock();renderProds();
 
 
 // ===== NAV =====
-var _NAV=['venta','ventas','clientes','cobros','compras','stock','productos','flujo','cierre','resumen','agenda','ayuda','config'];
+var _NAV=['venta','ventas','clientes','cobros','compras','proveedores','stock','productos','flujo','cierre','resumen','agenda','ayuda','config'];
 function goTo(s){
-  if(typeof ROLE!=='undefined'&&ROLE==='vendedor'&&['compras','productos','flujo','cierre','resumen','config'].indexOf(s)>=0){s='venta';}
+  if(typeof ROLE!=='undefined'&&ROLE==='vendedor'&&['compras','proveedores','productos','flujo','cierre','resumen','config'].indexOf(s)>=0){s='venta';}
   var N=(typeof _NAV!=='undefined'&&_NAV)?_NAV:[];
   N.forEach(function(x){var e=document.getElementById('sec-'+x);if(e)e.classList.remove('active');});
   document.querySelectorAll('.ni').forEach(function(x){x.classList.remove('active');});
   var e=document.getElementById('sec-'+s);if(e)e.classList.add('active');
   var ni=document.querySelectorAll('.ni')[N.indexOf(s)];if(ni)ni.classList.add('active');
-  var map={ventas:renderVentas,clientes:renderClientes,cobros:renderCobros,compras:renderCompras,
+  var map={ventas:renderVentas,clientes:renderClientes,cobros:renderCobros,compras:renderCompras,proveedores:renderProveedores,
     stock:renderStock,productos:renderProds,flujo:renderFlujo,cierre:renderCierre,resumen:renderResumen,agenda:renderAgenda,config:renderConfig};
   if(map[s])map[s]();
   if(window.innerWidth<=768){var sb=document.getElementById('sidebar');if(sb)sb.classList.remove('mob-open');}

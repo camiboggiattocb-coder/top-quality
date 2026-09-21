@@ -1049,7 +1049,7 @@ body.rol-vendedor .adminonly{display:none!important}
     <div class="field"><label>Medio de pago al proveedor</label><select id="cp-medio"><option>Transferencia</option><option>Cheque</option><option>Efectivo</option></select></div>
     <div class="field"><label>Notas</label><input type="text" id="cp-notas" placeholder="Observaciones..."></div>
     <div style="display:flex;gap:8px">
-      <button class="btn bp" style="flex:1" onclick="saveCompra()">Registrar compra</button>
+      <button class="btn bp" id="cp-guardar" style="flex:1" onclick="saveCompra()">Registrar compra</button>
       <button class="btn bo" onclick="closeMo('mo-compra')">Cancelar</button>
     </div>
   </div>
@@ -1321,9 +1321,8 @@ var DB = {
 };
 
 // Save all to Firebase
-function fbSave(){
-  setSaving(true);
-  Promise.all([
+function fbSaveP(){
+  return Promise.all([
     fbDB.collection('topquality').doc('ventas').set({list:_V}),
     fbDB.collection('topquality').doc('compras').set({list:_C}),
     fbDB.collection('topquality').doc('flujo').set({list:_F}),
@@ -1332,7 +1331,11 @@ function fbSave(){
     fbDB.collection('topquality').doc('proveedores').set({map:PROV}),
     fbDB.collection('topquality').doc('cheques').set({list:CHQ}),
     fbDB.collection('topquality').doc('clientes').set({map:_CLI})
-  ]).then(function(){setSaveOk();}).catch(function(e){handleSaveError(e);});
+  ]);
+}
+function fbSave(){
+  setSaving(true);
+  fbSaveP().then(function(){setSaveOk();}).catch(function(e){handleSaveError(e);});
 }
 
 // Legacy alias
@@ -2403,6 +2406,8 @@ function vSetDesc(i,v){carrito[i].descPct=parseFloat(v)||0;carrito[i].custom=nul
 
 function vRegistrar(){
   if(!carrito.length)return;
+  if(window._savingVenta)return;
+  var _prevS={},_flujoIds=[];
   var medio=el('v-medio').value,estado=el('v-estado').value,cliente=el('v-cliente').value.trim();
   var fechaVenta=el('v-fecha').value;
   var total=0,totalNeto=0;
@@ -2413,7 +2418,7 @@ function vRegistrar(){
     var u=item.custom!==null?item.custom:uBase;
     var sub=u*item.qty;total+=sub;totalNeto+=calcNeto(sub,medio);
     lista+=item.pl*item.qty;
-    DB.s[item.cod]=Math.max(0,(DB.s[item.cod]||0)-item.qty);
+    _prevS[item.cod]=(DB.s[item.cod]||0);DB.s[item.cod]=Math.max(0,(DB.s[item.cod]||0)-item.qty);
     return{cod:item.cod,nombre:item.nombre,cat:item.cat,sub:item.sub,variante:item.variante,qty:item.qty,precio_unit:u,subtotal:sub,costo:item.costo,descPct:item.descPct||0};
   });
   // Descuento global manual: sobre lista, gana el mayor descuento
@@ -2432,7 +2437,7 @@ function vRegistrar(){
     v.pagos=[{monto:total,fecha:fechaVenta,medio:medio,nota:'Pago completo'}];
     // registrar en flujo con fecha de acreditacion real
     if(fechaAcred){
-      DB.f.unshift({id:uid(),fecha:fechaAcred,concepto:'Venta'+(cliente?' - '+cliente:''),cat:'Caja',tipo:'ingreso',monto:totalNeto,ref:v.id,medio:medio});
+      var _fidV=uid();DB.f.unshift({id:_fidV,fecha:fechaAcred,concepto:'Venta'+(cliente?' - '+cliente:''),cat:'Caja',tipo:'ingreso',monto:totalNeto,ref:v.id,medio:medio});_flujoIds.push(_fidV);
     }
   }
   // handle partial payment entered at sale time
@@ -2443,19 +2448,31 @@ function vRegistrar(){
     var fAcredParcial=acredFecha(fechaVenta,pagoInicialMedio);
     var netoParcial=calcNeto(pagoInicialMonto,pagoInicialMedio);
     if(fAcredParcial){
-      DB.f.unshift({id:uid(),fecha:fAcredParcial,concepto:'Cobro parcial venta'+(cliente?' - '+cliente:''),cat:'Caja',tipo:'ingreso',monto:netoParcial,ref:v.id,medio:pagoInicialMedio});
+      var _fidP=uid();DB.f.unshift({id:_fidP,fecha:fAcredParcial,concepto:'Cobro parcial venta'+(cliente?' - '+cliente:''),cat:'Caja',tipo:'ingreso',monto:netoParcial,ref:v.id,medio:pagoInicialMedio});_flujoIds.push(_fidP);
     }
   }
   if(estado==='Pendiente'||medio==='Cuenta corriente') v.estado='Pendiente';
   v.usuario=window._USER||'';
   var _wsp=(el('v-wsp')?el('v-wsp').value.trim():''),_cum=(el('v-cumple')?el('v-cumple').value:'');
   if(cliente){var _k=cliente.toLowerCase();var _r=_CLI[_k]||{nombre:cliente};_r.nombre=cliente;if(_wsp)_r.whatsapp=_wsp;if(_cum)_r.cumple=_cum;_CLI[_k]=_r;if(_cum)agEnsureCumple(cliente,_cum,_r.whatsapp||'');}
-  DB.v.unshift(v);fbSave();
-  showTicket(v);
-  carrito=[];el('v-cliente').value='';el('v-obs').value='';if(el('v-wsp'))el('v-wsp').value='';if(el('v-cumple'))el('v-cumple').value='';el('v-estado').value='Pagado';el('v-fecha').value=tod();
-  el('v-parcial-monto').value='';el('v-pago-parcial-wrap').style.display='none';
-  if(el('v-desc-pct'))el('v-desc-pct').value='';
-  vRender();updCli();
+  DB.v.unshift(v);
+  window._savingVenta=true;setSaving(true);
+  var _bv=el('btn-vreg'); if(_bv){_bv.disabled=true;_bv.textContent='Guardando...';}
+  fbSaveP().then(function(){
+    setSaveOk();window._savingVenta=false;if(_bv){_bv.textContent='Confirmar venta';}
+    showTicket(v);
+    carrito=[];el('v-cliente').value='';el('v-obs').value='';if(el('v-wsp'))el('v-wsp').value='';if(el('v-cumple'))el('v-cumple').value='';el('v-estado').value='Pagado';el('v-fecha').value=tod();
+    el('v-parcial-monto').value='';el('v-pago-parcial-wrap').style.display='none';
+    if(el('v-desc-pct'))el('v-desc-pct').value='';
+    vRender();updCli();
+  }).catch(function(e){
+    Object.keys(_prevS).forEach(function(k){DB.s[k]=_prevS[k];});
+    var _iv=DB.v.findIndex(function(x){return x.id===v.id;});if(_iv>=0){DB.v.splice(_iv,1);}
+    _flujoIds.forEach(function(fid){var ix=DB.f.findIndex(function(x){return x.id===fid;});if(ix>=0){DB.f.splice(ix,1);}});
+    window._savingVenta=false;if(_bv){_bv.disabled=false;_bv.textContent='Confirmar venta';}
+    handleSaveError(e);
+    alert('\u26a0\ufe0f La venta NO se pudo guardar (revis\u00e1 la conexi\u00f3n a internet). No se descont\u00f3 stock ni se registr\u00f3 el cobro. El carrito qued\u00f3 intacto: volv\u00e9 a tocar Confirmar venta.');
+  });
 }
 
 function showTicket(v){
@@ -2638,18 +2655,32 @@ function saveCobro(){
   var v=DB.v.find(function(x){return x.id===cobroVentaId;});if(!v)return;
   var medio=el('cobro-medio').value;
   var fecha=el('cobro-fecha').value;
+  if(window._savingCobro)return;
   if(!v.pagos)v.pagos=[];
-  v.pagos.push({monto:monto,fecha:fecha,medio:medio,nota:el('cobro-nota').value||'Cobro parcial',usuario:window._USER||''});
+  var _prevEstado=v.estado;
+  var _pago={monto:monto,fecha:fecha,medio:medio,nota:el('cobro-nota').value||'Cobro parcial',usuario:window._USER||''};
+  v.pagos.push(_pago);
   var pag=v.pagos.reduce(function(a,p){return a+p.monto;},0);
   v.estado=pag>=v.total?'Pagado':'Parcial';
-  // registrar en flujo con fecha real de acreditacion
   var fAcred=acredFecha(fecha,medio);
   var neto=calcNeto(monto,medio);
+  var _fidC=null;
   if(fAcred){
-    DB.f.unshift({id:uid(),fecha:fAcred,concepto:'Cobro venta'+(v.cliente?' - '+v.cliente:''),cat:'Caja',tipo:'ingreso',monto:neto,ref:v.id,medio:medio});
+    _fidC=uid();DB.f.unshift({id:_fidC,fecha:fAcred,concepto:'Cobro venta'+(v.cliente?' - '+v.cliente:''),cat:'Caja',tipo:'ingreso',monto:neto,ref:v.id,medio:medio});
   }
-  fbSave();closeMo('mo-cobro-parcial');renderVentas();try{renderCobros();}catch(e){}
-  toast(v.estado==='Pagado'?'Venta cobrada completamente':'Cobro parcial registrado');
+  window._savingCobro=true;setSaving(true);
+  fbSaveP().then(function(){
+    setSaveOk();window._savingCobro=false;
+    closeMo('mo-cobro-parcial');renderVentas();try{renderCobros();}catch(e){}
+    toast(v.estado==='Pagado'?'\u2713 Venta cobrada completamente':'\u2713 Cobro parcial registrado');
+  }).catch(function(e){
+    var ix=v.pagos.indexOf(_pago);if(ix>=0){v.pagos.splice(ix,1);}
+    v.estado=_prevEstado;
+    if(_fidC){var fx=DB.f.findIndex(function(x){return x.id===_fidC;});if(fx>=0){DB.f.splice(fx,1);}}
+    window._savingCobro=false;
+    handleSaveError(e);
+    alert('\u26a0\ufe0f El cobro NO se pudo guardar (revis\u00e1 la conexi\u00f3n). No se registr\u00f3 nada. Volv\u00e9 a intentar en unos segundos.');
+  });
 }
 
 function delVenta(id){
@@ -3143,33 +3174,64 @@ function cRender(){
   tw.style.display='block';el('c-tot-v').textContent=fmt(tot);
 }
 function saveCompra(){
+  if(window._savingCompra){return;}
   if(!cCarrito.length){toast('Agrega al menos un producto');return;}
   var prov=el('cp-prov').value.trim();if(!prov){toast('Ingresa el proveedor');return;}
-  var total=cCarrito.reduce(function(a,it){return a+it.costo*it.qty;},0);
+  var items=cCarrito.slice();
+  var total=items.reduce(function(a,it){return a+it.costo*it.qty;},0);
   var est=el('cp-est').value,pagoIni=parseFloat(el('cp-pago').value)||0;
   var pagos=[];
   var cpMedio=el('cp-medio')?el('cp-medio').value:'Transferencia';
   if(est==='Pagado')pagos=[{monto:total,fecha:el('cp-fecha').value,medio:cpMedio,nota:'Pago completo',usuario:window._USER||''}];
   else if(pagoIni>0)pagos=[{monto:pagoIni,fecha:el('cp-fecha').value,medio:cpMedio,nota:'Pago inicial',usuario:window._USER||''}];
-  var comp={id:uid(),fecha:el('cp-fecha').value,proveedor:prov,items:cCarrito.slice(),total:total,pagos:pagos,notas:el('cp-notas').value};
-  cCarrito.forEach(function(it){
+  var comp={id:uid(),fecha:el('cp-fecha').value,proveedor:prov,items:items,total:total,pagos:pagos,notas:el('cp-notas').value,stockAplicado:true};
+  // Aplicar en memoria guardando el estado previo por si hay que revertir
+  var _prev=[];
+  items.forEach(function(it){
+    var rec={cod:it.cod, s:(DB.s[it.cod]||0), vd:null};
     DB.s[it.cod]=(DB.s[it.cod]||0)+it.qty;
     for(var pi=0;pi<PRODS.length;pi++){
       var vd=PRODS[pi].v.find(function(v){return v.cod===it.cod;});
       if(vd){
+        rec.vd=vd; rec.costo=vd.costo; rec.pl=vd.pl; rec.pe=vd.pe; rec.histLen=(vd.histCosto?vd.histCosto.length:0);
         if(it.costo&&it.costo!==vd.costo){if(!vd.histCosto)vd.histCosto=[];vd.histCosto.push({costo:vd.costo,fecha:comp.fecha});vd.costo=it.costo;}
         if(it.newPl){vd.pl=it.newPl;vd.pe=it.newPe?it.newPe:Math.round(it.newPl*0.85);}
         break;
       }
     }
+    _prev.push(rec);
   });
   DB.p=PRODS;DB.c.unshift(comp);
   var pag=pagos.reduce(function(a,p){return a+p.monto;},0);
-  if(pag>0){ if(cpMedio==='Cheque'){crearCheque(prov,pag,comp.fecha,'Pago de compra');} else {DB.f.unshift({id:uid(),fecha:comp.fecha,concepto:'Compra - '+prov,cat:'Proveedores',tipo:'egreso',monto:pag,medio:cpMedio,usuario:window._USER||''});} }
-  fbSave();closeMo('mo-compra');cCarrito=[];cRender();
-  if(pag>0&&cpMedio==='Cheque')toast('Compra registrada. El cheque quedó en la solapa Cheques (no se descontó del flujo todavía).');
-  el('cp-prov').value='';el('cp-notas').value='';el('cp-pago').value='';
-  toast('Compra registrada. Stock actualizado.');
+  var chequeId=null,flujoId=null;
+  if(pag>0){
+    if(cpMedio==='Cheque'){ var chB=(CHQ.length?CHQ[0].id:null); crearCheque(prov,pag,comp.fecha,'Pago de compra'); if(CHQ.length&&CHQ[0].id!==chB){chequeId=CHQ[0].id;} }
+    else { flujoId=uid(); DB.f.unshift({id:flujoId,fecha:comp.fecha,concepto:'Compra - '+prov,cat:'Proveedores',tipo:'egreso',monto:pag,medio:cpMedio,usuario:window._USER||''}); }
+  }
+  // Guardar y CONFIRMAR: solo damos la compra por hecha cuando Firebase confirma
+  window._savingCompra=true;
+  setSaving(true);
+  var btnC=el('cp-guardar');
+  if(btnC){btnC.disabled=true;btnC.textContent='Guardando...';}
+  fbSaveP().then(function(){
+    setSaveOk();
+    window._savingCompra=false;
+    if(btnC){btnC.disabled=false;btnC.textContent='Registrar compra';}
+    closeMo('mo-compra');cCarrito=[];cRender();
+    el('cp-prov').value='';el('cp-notas').value='';el('cp-pago').value='';
+    toast(pag>0&&cpMedio==='Cheque'?'\u2713 Compra guardada. El cheque qued\u00f3 en la solapa Cheques.':'\u2713 Compra guardada. Stock actualizado.');
+    renderCompras();
+  }).catch(function(e){
+    // Revertir TODO para no dejar la compra a medias
+    _prev.forEach(function(r){ DB.s[r.cod]=r.s; if(r.vd){ r.vd.costo=r.costo; r.vd.pl=r.pl; r.vd.pe=r.pe; if(r.vd.histCosto){r.vd.histCosto.length=r.histLen;} } });
+    var _ic=DB.c.findIndex(function(x){return x.id===comp.id;}); if(_ic>=0){DB.c.splice(_ic,1);}
+    if(chequeId){CHQ=CHQ.filter(function(x){return x.id!==chequeId;});}
+    if(flujoId){var _if=DB.f.findIndex(function(x){return x.id===flujoId;}); if(_if>=0){DB.f.splice(_if,1);}}
+    window._savingCompra=false;
+    if(btnC){btnC.disabled=false;btnC.textContent='Registrar compra';}
+    handleSaveError(e);
+    alert('\u26a0\ufe0f La compra NO se pudo guardar (revis\u00e1 la conexi\u00f3n a internet). No se toc\u00f3 el stock y los productos siguen en el carrito: esper\u00e1 unos segundos y volv\u00e9 a tocar Confirmar compra.');
+  });
 }
 function renderCompras(){
   var now=new Date(),mes=now.getMonth(),anio=now.getFullYear();

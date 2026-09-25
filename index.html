@@ -3073,6 +3073,25 @@ function renderClientes(){
     tb.appendChild(tr);
   });
 }
+function saveCliente(){
+  var nombre=window._cliEd; if(!nombre)return;
+  var wsp=(el('cli-ed-wsp')?el('cli-ed-wsp').value.trim():'');
+  var cum=(el('cli-ed-cum')?el('cli-ed-cum').value:'');
+  var k=nombre.toLowerCase();
+  var r=_CLI[k]||{nombre:nombre};
+  r.nombre=nombre; r.whatsapp=wsp; r.cumple=cum; _CLI[k]=r;
+  var found=(AG&&AG.tareas)?AG.tareas.find(function(t){return t.tipo==='cumple'&&t.cliente&&t.cliente.toLowerCase()===k;}):null;
+  var agChanged=false;
+  if(cum){
+    if(found){ found.fecha=cum; found.tel=wsp; found.titulo='Cumple '+nombre; if(typeof tocar==='function')tocar(found); agChanged=true; }
+    else { agEnsureCumple(nombre,cum,wsp); }
+  } else if(found){ found.tel=wsp; agChanged=true; }
+  saveClientes();
+  if(agChanged){ try{saveAgenda();}catch(e){} }
+  toast('Datos del cliente actualizados');
+  renderClientes();
+  closeMo('mo-cli');
+}
 function verCliente(i){
   var c=cliCache[i];if(!c)return;
   var vv=DB.v.filter(function(v){return v.cliente===c.nombre;});
@@ -3083,6 +3102,10 @@ function verCliente(i){
     var sc=mk('div','sc');sc.appendChild(mk('div','sl',pair[0]));sc.appendChild(mk('div','sv',pair[1]));sg.appendChild(sc);
   });
   b.appendChild(sg);
+  window._cliEd=c.nombre;
+  var ed=document.createElement('div');ed.className='card';ed.style.margin='0 0 14px';
+  ed.innerHTML='<div class="card-t" style="margin-bottom:10px">Datos de contacto</div>'+'<div class="r2"><div class="field"><label>WhatsApp</label><input type="text" id="cli-ed-wsp" placeholder="Ej: 3512345678" value="'+escAttr(c.whatsapp||'')+'"></div>'+'<div class="field"><label>Cumplea&#241;os</label><input type="date" id="cli-ed-cum" value="'+escAttr(c.cumple||'')+'"></div></div>'+'<button class="btn bp bsm" onclick="saveCliente()">Guardar datos</button>';
+  b.appendChild(ed);
   var tw=mk('div','tw');var tbl=document.createElement('table');
   var thead=mk('thead');var htr=mk('tr');
   ['Fecha','Items','Medio','Estado','Total','Saldo'].forEach(function(h){htr.appendChild(mk('th','',h));});

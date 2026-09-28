@@ -398,7 +398,7 @@ body.rol-vendedor .adminonly{display:none!important}
         <div class="field"><label>Buscar producto</label>
           <div class="sw" id="sw-v">
             <span class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
-            <input type="text" id="v-bus" placeholder="Nombre del producto..." autocomplete="off" oninput="vSearch(this.value)" onfocus="vSearch(this.value)">
+            <input type="text" id="v-bus" placeholder="Buscar por nombre o código..." autocomplete="off" oninput="vSearch(this.value)" onfocus="vSearch(this.value)">
             <div class="dd" id="v-dd"></div>
           </div>
         </div>
@@ -2256,7 +2256,7 @@ function vSearch(q){
   var dd=el('v-dd');
   if(!q.trim()){dd.classList.remove('open');return;}
   var t=q.toLowerCase();
-  vRes=PRODS.filter(function(p){return p.n.toLowerCase().indexOf(t)>=0||p.s.toLowerCase().indexOf(t)>=0;});
+  vRes=PRODS.filter(function(p){return p.n.toLowerCase().indexOf(t)>=0||p.s.toLowerCase().indexOf(t)>=0||(p.v&&p.v.some(function(v){return (v.cod||'').toLowerCase().indexOf(t)>=0;}));});
   dd.innerHTML='';
   if(!vRes.length){
     var d=mk('div','ddi','Sin resultados');d.style.color='var(--txt3)';dd.appendChild(d);

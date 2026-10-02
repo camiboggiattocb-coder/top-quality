@@ -3974,7 +3974,7 @@ document.addEventListener('click',function(e){
   var swv=el('sw-v');if(swv&&!swv.contains(e.target))el('v-dd').classList.remove('open');
   var swc=el('sw-c');if(swc&&!swc.contains(e.target)){var dd=el('c-dd');if(dd)dd.classList.remove('open');}
 });
-document.querySelectorAll('.mo').forEach(function(m){m.addEventListener('click',function(e){if(e.target===m)m.classList.remove('open');});});
+/* cierre por clic-afuera desactivado (ver arriba) */
 
 // ===== INIT =====
 el('cierre-fecha').value=tod();
@@ -4036,9 +4036,7 @@ function getCostoReal(costo){
 // ===== CONFIGURACION END =====
 
 // Close modals & dropdowns
-document.querySelectorAll('.mo').forEach(function(m){
-  m.addEventListener('click',function(e){if(e.target===m)m.classList.remove('open');});
-});
+/* cierre por clic-afuera desactivado: las ventanas se cierran solo con la X o Cancelar (evita cierres accidentales mientras se carga) */
 document.addEventListener('click',function(e){
   var swv=document.getElementById('sw-v');
   if(swv&&!swv.contains(e.target)){var dd=document.getElementById('v-dd');if(dd)dd.classList.remove('open');}

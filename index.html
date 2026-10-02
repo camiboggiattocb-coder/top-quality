@@ -491,6 +491,8 @@ body.rol-vendedor .adminonly{display:none!important}
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn bo bsm" onclick="exportVentasExcel()">&#8595; Excel</button>
       <button class="btn bo bsm" onclick="exportVentasPDF()">&#8595; PDF</button>
+      <button class="btn bo bsm" onclick="abrirCambio()">⇄ Cambio</button>
+      <button class="btn bo bsm" onclick="abrirCambiosHist()">Cambios</button>
       <button class="btn bp bsm" onclick="goTo('venta')">+ Nueva venta</button>
     </div>
   </div>
@@ -818,11 +820,7 @@ body.rol-vendedor .adminonly{display:none!important}
 <li>Se abre el <b>ticket</b>: podés <b>Imprimir</b>, generar un <b>Ticket de cambio</b> o empezar una <b>Nueva venta</b>.</li>
 </ol></div>
 <div class="mtip">💡 El precio de <b>tarjeta</b> ya incluye el recargo; <b>efectivo y transferencia</b> usan el precio con el descuento del producto.</div>
-<div class="mtip">💡 ¿Te equivocaste? Cerrá el ticket y en <b>Historial ventas</b> Ale o Caren pueden ver, editar o eliminar la venta.</div></div><div class="mcard"><div class="mhead"><div class="mico" style="background:#1a3d7a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div><div><div class="mnum">PASO 3</div><div class="mtitle">Ticket de cambio</div></div><span class="mrole all">Todos</span></div><div class="mbody"><ol>
-<li>Después de <b>Confirmar venta</b>, en la ventana del ticket tocá <b>Ticket de cambio</b>.</li>
-<li>Se imprime un comprobante <b>sin precios</b>, con la <b>fecha de caducidad</b> (7 días) y la aclaración de que el cambio es por otro producto abonando la diferencia.</li>
-<li>Entregáselo al cliente junto con la prenda.</li>
-</ol></div>
+<div class="mtip">💡 ¿Te equivocaste? Cerrá el ticket y en <b>Historial ventas</b> Ale o Caren pueden ver, editar o eliminar la venta.</div></div><div class="mcard"><div class="mhead"><div class="mico" style="background:#1a3d7a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div><div><div class="mnum">PASO 3</div><div class="mtitle">Ticket de cambio</div></div><span class="mrole all">Todos</span></div><div class="mbody"><ol><li><b>El comprobante para el cliente:</b> después de <b>Confirmar venta</b>, en la ventana del ticket tocá <b>Ticket de cambio</b>. Se imprime <b>sin precios</b>, con la <b>caducidad</b> (7 días) y la aclaración de que el cambio es por otro producto abonando la diferencia. Entregáselo junto con la prenda.</li><li><b>Cuando el cliente vuelve a cambiar:</b> entrá a <b>Historial de ventas</b> y tocá el botón <b>⇄ Cambio</b>.</li><li>En <b>Producto que devuelve el cliente</b> buscá lo que trae, elegí talle y cantidad, revisá el valor y tocá <b>+ Agregar</b>. Eso <b>vuelve al stock</b>.</li><li>En <b>Producto que se lleva</b> buscá lo nuevo, elegí talle y cantidad y tocá <b>+ Agregar</b>. Eso <b>sale del stock</b>.</li><li>El sistema calcula la <b>diferencia</b>: si el nuevo es más caro, el cliente paga la diferencia (elegí el medio de pago y queda en el flujo); si es más barato, queda un <b>saldo a favor</b>.</li><li>Tocá <b>Registrar cambio</b>. Con el botón <b>Cambios</b> veés el historial de todos los cambios hechos.</li></ol></div><div class="mtip">💡 El stock se ajusta solo: suma lo devuelto y descuenta lo que se lleva. El cambio queda registrado aparte, en el historial de cambios.</div>
 <div class="mtip">💡 Sirve para que el cliente pueda cambiar el producto sin que figure el precio que pagó.</div></div><div class="mcard"><div class="mhead"><div class="mico" style="background:#b7791f"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div><div class="mnum">PASO 4</div><div class="mtitle">Cobros (cuenta corriente / fiado)</div></div><span class="mrole all">Todos</span></div><div class="mbody"><ol>
 <li>Entrá a <b>Cobros</b>. Ves la lista de clientes que tienen <b>saldo pendiente</b> (fiado / cuenta corriente) y el total a cobrar.</li>
 <li>Cuando un cliente viene a pagar, buscá su fila y tocá <b>Registrar pago</b>.</li>
@@ -1068,6 +1066,40 @@ body.rol-vendedor .adminonly{display:none!important}
     </div>
   </div>
 </div>
+<div class="mo" id="mo-cambio"><div class="md mdl">
+  <div class="mh"><div class="mt2">Registrar cambio</div><button class="mc2" onclick="closeMo('mo-cambio')">&#215;</button></div>
+  <div class="r2" style="margin-bottom:12px">
+    <div class="field"><label>Cliente (opcional)</label><input type="text" id="cam-cliente" placeholder="Nombre"></div>
+    <div class="field"><label>Fecha</label><input type="date" id="cam-fecha"></div>
+  </div>
+  <div class="card" style="border-left:3px solid var(--green);margin-bottom:12px">
+    <div class="card-t" style="margin-bottom:8px">Producto que DEVUELVE el cliente <span style="font-weight:400;color:var(--txt3)">(vuelve al stock)</span></div>
+    <div style="position:relative;margin-bottom:8px"><input type="text" id="cam-dev-bus" placeholder="Buscar por nombre o c&#243;digo..." oninput="camSearch('dev',this.value)" style="width:100%"><div id="cam-dev-dd" class="dd"></div></div>
+    <div id="cam-dev-wrap" style="display:none;margin-bottom:8px"><div class="r3">
+      <div class="field"><label>Talle</label><select id="cam-dev-var" onchange="camVar('dev')"></select></div>
+      <div class="field"><label>Cantidad</label><input type="number" id="cam-dev-qty" value="1" min="1"></div>
+      <div class="field"><label>Valor unitario</label><input type="number" id="cam-dev-precio" placeholder="0"></div>
+    </div><button class="btn bo bsm" onclick="camAgregar('dev')">+ Agregar</button></div>
+    <div id="cam-dev-items"></div>
+  </div>
+  <div class="card" style="border-left:3px solid var(--acc);margin-bottom:12px">
+    <div class="card-t" style="margin-bottom:8px">Producto que SE LLEVA <span style="font-weight:400;color:var(--txt3)">(sale del stock)</span></div>
+    <div style="position:relative;margin-bottom:8px"><input type="text" id="cam-lle-bus" placeholder="Buscar por nombre o c&#243;digo..." oninput="camSearch('lle',this.value)" style="width:100%"><div id="cam-lle-dd" class="dd"></div></div>
+    <div id="cam-lle-wrap" style="display:none;margin-bottom:8px"><div class="r3">
+      <div class="field"><label>Talle</label><select id="cam-lle-var" onchange="camVar('lle')"></select></div>
+      <div class="field"><label>Cantidad</label><input type="number" id="cam-lle-qty" value="1" min="1"></div>
+      <div class="field"><label>Valor unitario</label><input type="number" id="cam-lle-precio" placeholder="0"></div>
+    </div><button class="btn bo bsm" onclick="camAgregar('lle')">+ Agregar</button></div>
+    <div id="cam-lle-items"></div>
+  </div>
+  <div id="cam-resumen" style="padding:10px 12px;background:var(--surf2);border-radius:var(--r);font-size:13px;margin-bottom:12px"></div>
+  <div class="field" id="cam-medio-wrap" style="display:none"><label>Medio de pago de la diferencia</label><select id="cam-medio"><option value="Efectivo">Efectivo</option><option value="Transferencia">Transferencia</option><option value="Debito">D&#233;bito</option><option value="Tarjeta credito">Tarjeta cr&#233;dito</option></select></div>
+  <div style="display:flex;gap:8px">
+    <button class="btn bp" style="flex:1" onclick="saveCambio()">Registrar cambio</button>
+    <button class="btn bo" onclick="closeMo('mo-cambio')">Cancelar</button>
+  </div>
+</div></div>
+<div class="mo" id="mo-cambios-hist"><div class="md mdl"><div class="mh"><div class="mt2">Historial de cambios</div><button class="mc2" onclick="closeMo('mo-cambios-hist')">&#215;</button></div><div id="cambios-hist-body"></div></div></div>
 <div class="mo" id="mo-comp-det">
   <div class="md mdl">
     <div class="mh"><div class="mt2">Detalle de compra</div><button class="mc2" onclick="closeMo('mo-comp-det')">&#215;</button></div>
@@ -1330,6 +1362,7 @@ function fbSaveP(){
     fbDB.collection('topquality').doc('agenda').set({list:AG.tareas,borradas:AG.borradas||{},autoCorrer:AG.autoCorrer!==false}),
     fbDB.collection('topquality').doc('proveedores').set({map:PROV}),
     fbDB.collection('topquality').doc('cheques').set({list:CHQ}),
+    fbDB.collection('topquality').doc('cambios').set({list:CAMBIOS}),
     fbDB.collection('topquality').doc('clientes').set({map:_CLI})
   ]);
 }
@@ -1638,6 +1671,140 @@ function provDetalle(key){
   }
   if(el('provdet-body'))el('provdet-body').innerHTML=h;
   openMo('mo-prov-det');
+}
+
+/* ====== CAMBIOS (botón de cambio guiado) ====== */
+var _camDev=[], _camLle=[];
+var CAMBIOS=[];
+function saveCambiosDoc(){setSaving(true);fbDB.collection('topquality').doc('cambios').set({list:CAMBIOS}).then(function(){setSaveOk();}).catch(function(e){handleSaveError(e);});}
+function camListen(){fbDB.collection('topquality').doc('cambios').onSnapshot(function(doc){if(doc.exists&&doc.data().list)CAMBIOS=doc.data().list;});}
+
+function abrirCambio(){
+  _camDev=[]; _camLle=[];
+  window._camdevSel=null; window._camlleSel=null;
+  if(el('cam-cliente'))el('cam-cliente').value='';
+  if(el('cam-fecha'))el('cam-fecha').value=tod();
+  ['dev','lle'].forEach(function(s){ if(el('cam-'+s+'-bus'))el('cam-'+s+'-bus').value=''; if(el('cam-'+s+'-wrap'))el('cam-'+s+'-wrap').style.display='none'; if(el('cam-'+s+'-qty'))el('cam-'+s+'-qty').value='1'; });
+  camRender();
+  openMo('mo-cambio');
+}
+function camSearch(side,q){
+  var dd=el('cam-'+side+'-dd'); if(!dd)return;
+  if(!q.trim()){dd.classList.remove('open');return;}
+  var t=q.toLowerCase();
+  var res=PRODS.filter(function(p){return p.n.toLowerCase().indexOf(t)>=0||p.s.toLowerCase().indexOf(t)>=0||(p.v&&p.v.some(function(v){return (v.cod||'').toLowerCase().indexOf(t)>=0;}));}).slice(0,12);
+  window['_cam'+side+'Res']=res;
+  dd.innerHTML='';
+  if(!res.length){var d=mk('div','ddi','Sin resultados');d.style.color='var(--txt3)';dd.appendChild(d);dd.classList.add('open');return;}
+  res.forEach(function(p,i){
+    var row=mk('div','ddi');
+    var left=mk('div');left.appendChild(mk('div','ddi-n',p.n));left.appendChild(mk('div','ddi-s',p.s+' · '+(p.v[0]?p.v[0].cod:'')));
+    row.appendChild(left);
+    row.addEventListener('click',(function(ii){return function(){camSel(side,ii);};})(i));
+    dd.appendChild(row);
+  });
+  dd.classList.add('open');
+}
+function camSel(side,i){
+  var res=window['_cam'+side+'Res']||[]; var p=res[i]; if(!p)return;
+  window['_cam'+side+'Sel']=p;
+  el('cam-'+side+'-dd').classList.remove('open');
+  el('cam-'+side+'-bus').value=p.n;
+  var sel=el('cam-'+side+'-var'); sel.innerHTML='';
+  p.v.forEach(function(v){var o=document.createElement('option');o.value=v.t;o.textContent=v.t+' · '+v.cod;sel.appendChild(o);});
+  el('cam-'+side+'-precio').value=(p.v[0]?p.v[0].pe:0)||0;
+  el('cam-'+side+'-wrap').style.display='block';
+}
+function camVar(side){
+  var p=window['_cam'+side+'Sel']; if(!p)return;
+  var t=el('cam-'+side+'-var').value;
+  var vd=p.v.find(function(v){return v.t===t;});
+  el('cam-'+side+'-precio').value=(vd?vd.pe:0)||0;
+}
+function camAgregar(side){
+  var p=window['_cam'+side+'Sel']; if(!p){toast('Elegí un producto');return;}
+  var t=el('cam-'+side+'-var').value;
+  var vd=p.v.find(function(v){return v.t===t;}); if(!vd)return;
+  var qty=parseInt(el('cam-'+side+'-qty').value)||1;
+  var precio=parseFloat(el('cam-'+side+'-precio').value)||0;
+  (side==='dev'?_camDev:_camLle).push({cod:vd.cod,nombre:p.n,sub:p.s,variante:t,qty:qty,precio:precio});
+  el('cam-'+side+'-bus').value=''; el('cam-'+side+'-wrap').style.display='none'; window['_cam'+side+'Sel']=null; el('cam-'+side+'-qty').value='1';
+  camRender();
+}
+function camRender(){
+  ['dev','lle'].forEach(function(side){
+    var arr=(side==='dev')?_camDev:_camLle;
+    var wrap=el('cam-'+side+'-items'); if(!wrap)return; wrap.innerHTML='';
+    if(!arr.length){wrap.innerHTML='<div class="muted" style="font-size:12px;padding:4px 0">Sin productos</div>';return;}
+    arr.forEach(function(it,i){
+      var row=mk('div','ci');
+      var info=mk('div');info.appendChild(mk('div','ci-n',it.nombre));info.appendChild(mk('div','ci-d',it.variante+' · '+it.cod+' · x'+it.qty+' · '+fmt(it.precio)+'/u'));
+      var right=mk('div','ci-r');
+      var sp=mk('span','',fmt(it.precio*it.qty));sp.style.cssText='font-weight:700;font-family:monospace';right.appendChild(sp);
+      var bd=mk('button','bgh btn bsm','×');bd.style.padding='3px 6px';
+      bd.addEventListener('click',(function(s,ii){return function(){ (s==='dev'?_camDev:_camLle).splice(ii,1); camRender(); };})(side,i));
+      right.appendChild(bd);row.appendChild(info);row.appendChild(right);wrap.appendChild(row);
+    });
+  });
+  var vDev=_camDev.reduce(function(a,it){return a+it.precio*it.qty;},0);
+  var vLle=_camLle.reduce(function(a,it){return a+it.precio*it.qty;},0);
+  var dif=vLle-vDev;
+  var r=el('cam-resumen');
+  if(r){
+    var txt='Devuelve: <b>'+fmt(vDev)+'</b> &nbsp;·&nbsp; Se lleva: <b>'+fmt(vLle)+'</b><br>';
+    if(dif>0)txt+='<span style="color:var(--amber);font-weight:700">El cliente paga la diferencia: '+fmt(dif)+'</span>';
+    else if(dif<0)txt+='<span style="color:var(--green);font-weight:700">Saldo a favor del cliente: '+fmt(-dif)+'</span>';
+    else txt+='<span style="font-weight:700">Sin diferencia</span>';
+    r.innerHTML=txt;
+  }
+  var mw=el('cam-medio-wrap'); if(mw)mw.style.display=dif>0?'block':'none';
+}
+function saveCambio(){
+  if(window._savingCambio)return;
+  if(!_camDev.length||!_camLle.length){alert('Cargá al menos un producto que el cliente devuelve y uno que se lleva.');return;}
+  var fecha=(el('cam-fecha')?el('cam-fecha').value:tod())||tod();
+  var cliente=(el('cam-cliente')?el('cam-cliente').value.trim():'');
+  var vDev=_camDev.reduce(function(a,it){return a+it.precio*it.qty;},0);
+  var vLle=_camLle.reduce(function(a,it){return a+it.precio*it.qty;},0);
+  var dif=vLle-vDev;
+  var medio=dif>0?(el('cam-medio')?el('cam-medio').value:'Efectivo'):'';
+  var _prevS={};
+  _camDev.forEach(function(it){ if(!(it.cod in _prevS))_prevS[it.cod]=(DB.s[it.cod]||0); DB.s[it.cod]=(DB.s[it.cod]||0)+it.qty; });
+  _camLle.forEach(function(it){ if(!(it.cod in _prevS))_prevS[it.cod]=(DB.s[it.cod]||0); DB.s[it.cod]=Math.max(0,(DB.s[it.cod]||0)-it.qty); });
+  var flujoId=null;
+  if(dif>0){ var neto=calcNeto(dif,medio); var fAc=acredFecha(fecha,medio); if(fAc){ flujoId=uid(); DB.f.unshift({id:flujoId,fecha:fAc,concepto:'Cambio'+(cliente?' - '+cliente:''),cat:'Caja',tipo:'ingreso',monto:neto,medio:medio,usuario:window._USER||''}); } }
+  var camId=uid();
+  CAMBIOS.unshift({id:camId,fecha:fecha,cliente:cliente,devuelve:_camDev.slice(),lleva:_camLle.slice(),valorDev:vDev,valorLleva:vLle,diferencia:dif,medio:medio,usuario:window._USER||''});
+  window._savingCambio=true; setSaving(true);
+  fbSaveP().then(function(){
+    setSaveOk(); window._savingCambio=false;
+    closeMo('mo-cambio'); _camDev=[]; _camLle=[];
+    var s=document.querySelector('.sec.active'); if(s&&s.id==='sec-stock'&&typeof renderStock==='function')renderStock();
+    toast(dif>0?'✓ Cambio registrado. A cobrar '+fmt(dif):(dif<0?'✓ Cambio registrado. Saldo a favor '+fmt(-dif):'✓ Cambio registrado'));
+  }).catch(function(e){
+    Object.keys(_prevS).forEach(function(k){DB.s[k]=_prevS[k];});
+    var ci=CAMBIOS.findIndex(function(x){return x.id===camId;}); if(ci>=0)CAMBIOS.splice(ci,1);
+    if(flujoId){var fi=DB.f.findIndex(function(x){return x.id===flujoId;}); if(fi>=0)DB.f.splice(fi,1);}
+    window._savingCambio=false;
+    handleSaveError(e);
+    alert('⚠️ El cambio NO se pudo guardar (revisá la conexión). No se modificó el stock. Volvé a intentar.');
+  });
+}
+function abrirCambiosHist(){
+  var h='';
+  if(!CAMBIOS.length){h='<div class="muted">Todavía no se registraron cambios.</div>';}
+  else{
+    h='<div class="tw"><table><thead><tr><th>Fecha</th><th>Cliente</th><th>Devolvió</th><th>Se llevó</th><th>Diferencia</th><th>Usuario</th></tr></thead><tbody>';
+    CAMBIOS.forEach(function(c){
+      var dev=(c.devuelve||[]).map(function(x){return esc(x.nombre)+' ('+x.variante+') x'+x.qty;}).join('<br>');
+      var lle=(c.lleva||[]).map(function(x){return esc(x.nombre)+' ('+x.variante+') x'+x.qty;}).join('<br>');
+      var difTxt=c.diferencia>0?('<span style="color:var(--amber)">Cobró '+fmt(c.diferencia)+'</span>'):(c.diferencia<0?('<span style="color:var(--green)">A favor '+fmt(-c.diferencia)+'</span>'):'—');
+      h+='<tr><td class="mono">'+fmtD(c.fecha)+'</td><td>'+esc(c.cliente||'-')+'</td><td style="font-size:12px">'+dev+'</td><td style="font-size:12px">'+lle+'</td><td>'+difTxt+'</td><td>'+esc(c.usuario||'')+'</td></tr>';
+    });
+    h+='</tbody></table></div>';
+  }
+  if(el('cambios-hist-body'))el('cambios-hist-body').innerHTML=h;
+  openMo('mo-cambios-hist');
 }
 
 /* ====== AGENDA ESTILO NEXUS (día / semana / mes / lista) ====== */
@@ -2083,6 +2250,7 @@ function startApp(){
   try{cliListen();}catch(e){}
   try{provListen();}catch(e){}
   try{chqListen();}catch(e){}
+  try{camListen();}catch(e){}
   try{loadFin();}catch(e){}
   try{loadDias();}catch(e){}
   // Load all data once on startup, then listen for changes
@@ -2690,6 +2858,7 @@ function delVenta(id){
 
 // ============ EDICION DE VENTA ============
 var _vedId=null;
+var _vedCli='',_vedWsp='',_vedCum='';
 var _vedItems=[];
 var _vedOrigTotal=0;
 
@@ -2702,6 +2871,7 @@ function editVenta(id){
     descPct:it.descPct||0
   };});
   _vedOrigTotal=v.total;
+  _vedCli=v.cliente||'';var _cr0=_CLI[(v.cliente||'').toLowerCase()]||{};_vedWsp=_cr0.whatsapp||'';_vedCum=_cr0.cumple||'';
   vedRender();
   openMo('mo-ved');
 }
@@ -2709,6 +2879,12 @@ function editVenta(id){
 function vedRender(){
   var b=el('ved-body');
   var h='';
+  h+='<div class="card-t" style="margin:4px 0 8px">Datos del cliente</div>';
+  h+='<div class="r3" style="margin-bottom:14px">';
+  h+='<div class="field"><label>Cliente</label><input type="text" id="ved-cliente" value="'+escAttr(_vedCli||'')+'" placeholder="Nombre del cliente" oninput="_vedCli=this.value"></div>';
+  h+='<div class="field"><label>WhatsApp</label><input type="text" id="ved-wsp" value="'+escAttr(_vedWsp||'')+'" placeholder="Ej: 3512345678" oninput="_vedWsp=this.value"></div>';
+  h+='<div class="field"><label>Cumplea&#241;os</label><input type="date" id="ved-cum" value="'+escAttr(_vedCum||'')+'" oninput="_vedCum=this.value"></div>';
+  h+='</div>';
   h+='<div class="card-t" style="margin:4px 0 8px">Agregar producto</div>';
   h+='<div style="position:relative;margin-bottom:12px">';
   h+='<input type="text" id="ved-bus" placeholder="Buscar producto por nombre o codigo..." oninput="vedSearch(this.value)" style="width:100%">';
@@ -2885,6 +3061,18 @@ function saveVentaEdit(){
     }
   }
   
+  // Datos del cliente (permite completar lo que se olvidaron al cargar)
+  var _nc=(el('ved-cliente')?el('ved-cliente').value.trim():(_vedCli||''));
+  v.cliente=_nc;
+  if(_nc){
+    var _k=_nc.toLowerCase();var _r=_CLI[_k]||{nombre:_nc};_r.nombre=_nc;
+    var _w=(el('ved-wsp')?el('ved-wsp').value.trim():(_vedWsp||''));
+    var _cm=(el('ved-cum')?el('ved-cum').value:(_vedCum||''));
+    _r.whatsapp=_w;_r.cumple=_cm;_CLI[_k]=_r;
+    var _ft=(AG&&AG.tareas)?AG.tareas.find(function(t){return t.tipo==='cumple'&&t.cliente&&t.cliente.toLowerCase()===_k;}):null;
+    if(_cm){ if(_ft){_ft.fecha=_cm;_ft.tel=_w;_ft.titulo='Cumple '+_nc;if(typeof tocar==='function')tocar(_ft);} else {agEnsureCumple(_nc,_cm,_w);} }
+    else if(_ft){_ft.tel=_w;}
+  }
   DB.v=_V;
   fbSave();
   saveStockNow();

@@ -1021,7 +1021,7 @@ body.rol-vendedor .adminonly{display:none!important}
     <div class="field"><label>Buscar en maestro</label>
       <div class="sw" id="sw-c">
         <span class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
-        <input type="text" id="c-bus" placeholder="Nombre del producto..." autocomplete="off" oninput="cSearch(this.value)" onfocus="cSearch(this.value)">
+        <input type="text" id="c-bus" placeholder="Buscar por nombre o código..." autocomplete="off" oninput="cSearch(this.value)" onfocus="cSearch(this.value)">
         <div class="dd" id="c-dd"></div>
       </div>
     </div>
@@ -3339,7 +3339,7 @@ function cSearch(q){
   var dd=el('c-dd');
   if(!q.trim()){dd.classList.remove('open');return;}
   var t=q.toLowerCase();
-  cRes=PRODS.filter(function(p){return p.n.toLowerCase().indexOf(t)>=0||p.s.toLowerCase().indexOf(t)>=0;});
+  cRes=PRODS.filter(function(p){return p.n.toLowerCase().indexOf(t)>=0||p.s.toLowerCase().indexOf(t)>=0||(p.v&&p.v.some(function(v){return (v.cod||'').toLowerCase().indexOf(t)>=0;}));});
   dd.innerHTML='';
   if(!cRes.length){var d=mk('div','ddi','Sin resultados');d.style.color='var(--txt3)';dd.appendChild(d);dd.classList.add('open');return;}
   cRes.slice(0,12).forEach(function(p,i){

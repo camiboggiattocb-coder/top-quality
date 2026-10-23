@@ -2481,11 +2481,18 @@ function startApp(){
   });
 
  // Stock - realtime desde Firebase (fuente de verdad)
+  window._stockLoaded=false;
+  // red de seguridad: si no hay internet y nunca llega el snapshot, habilitar igual a los 8 seg
+  setTimeout(function(){window._stockLoaded=true;},8000);
   fbDB.collection('topquality').doc('stock').onSnapshot(function(doc){
     if(doc.exists && doc.data().s){
       _S = doc.data().s;
       if(doc.data().sm) _SM = doc.data().sm;
+    } else if(!doc.exists){
+      // primera vez: sembrar la nube con el stock inicial del Excel (una sola vez)
+      try{fbDB.collection('topquality').doc('stock').set({s:_S,sm:_SM});}catch(e){}
     }
+    window._stockLoaded=true;
     var s=document.querySelector('.sec.active');
     if(s&&s.id==='sec-stock')renderStock();
   });
@@ -2773,6 +2780,7 @@ function vSetDesc(i,v){carrito[i].descPct=parseFloat(v)||0;carrito[i].custom=nul
 function vRegistrar(){
   if(!carrito.length)return;
   if(window._savingVenta)return;
+  if(!window._stockLoaded){toast('El stock se est\u00e1 terminando de cargar, esper\u00e1 unos segundos y volv\u00e9 a confirmar.');return;}
   var _prevS={},_flujoIds=[];
   var medio=el('v-medio').value,estado=el('v-estado').value,cliente=el('v-cliente').value.trim();
   var fechaVenta=el('v-fecha').value;
@@ -3584,6 +3592,7 @@ function cRender(){
 }
 function saveCompra(){
   if(window._savingCompra){return;}
+  if(!window._stockLoaded){toast('El stock se est\u00e1 terminando de cargar, esper\u00e1 unos segundos y volv\u00e9 a tocar Registrar.');return;}
   if(!cCarrito.length){toast('Agrega al menos un producto');return;}
   var prov=el('cp-prov').value.trim();if(!prov){toast('Ingresa el proveedor');return;}
   var items=cCarrito.slice();

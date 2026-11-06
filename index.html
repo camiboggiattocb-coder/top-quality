@@ -2594,7 +2594,16 @@ if(DB.p)PRODS=DB.p;
 // ===== UTILS =====
 function fmt(n){return '$'+Math.round(n).toLocaleString('es-AR');}
 function fmtD(d){return d?new Date(d+'T12:00:00').toLocaleDateString('es-AR'):'';}
-function tod(){return new Date().toISOString().split('T')[0];}
+function tod(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function refreshFechas(){
+  ['v-fecha','cp-fecha','cierre-fecha','fl-fecha','cobro-fecha','pp-fecha','cam-fecha','cnd-fecha','chn-fecha','chp-fecha','pgp-fecha','pc-fecha','pn-fecha'].forEach(function(id){
+    var e=document.getElementById(id); if(!e)return;
+    var mo=e.closest?e.closest('.mo'):null; if(mo&&mo.classList.contains('open'))return; // no tocar si su ventana está abierta
+    e.value=tod();
+  });
+}
+document.addEventListener('visibilitychange',function(){ if(!document.hidden){ try{refreshFechas();}catch(e){} } });
+window.addEventListener('focus',function(){ try{refreshFechas();}catch(e){} });
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
 function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);}
 function openMo(id){document.getElementById(id).classList.add('open');}
@@ -3008,6 +3017,11 @@ function verVenta(id){
     btn.addEventListener('click',function(){closeMo('mo-vdet');openCobro(v.id);});
     b.appendChild(btn);
   }
+  var btnEd=mk('button','btn bo bfull','✏️ Editar / cambiar art\u00edculos');btnEd.style.marginTop='8px';
+  btnEd.addEventListener('click',function(){closeMo('mo-vdet');editVenta(v.id);});
+  b.appendChild(btnEd);
+  var hint=mk('div','','Quitá el art\u00edculo que devuelven (vuelve al stock), agreg\u00e1 el que se llevan y el sistema calcula la diferencia.');
+  hint.style.cssText='font-size:11px;color:var(--txt3);margin-top:8px;text-align:center';b.appendChild(hint);
   openMo('mo-vdet');
 }
 
